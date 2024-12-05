@@ -20,6 +20,16 @@ resource "github_repository_environment" "main" {
 
 }
 
+# Add a null_resource for delay
+resource "null_resource" "delay_after_environment_creation" {
+  depends_on = [github_repository_environment.main]
+
+  provisioner "local-exec" {
+    # Adjust the delay (in seconds) as needed
+    command = "sleep ${var.delay_after_environment_creation}"
+  }
+}
+
 resource "github_actions_environment_variable" "terraform_version" {
 
   for_each = var.environments
@@ -28,6 +38,9 @@ resource "github_actions_environment_variable" "terraform_version" {
   environment   = each.key
   variable_name = "TERRAFORM_VERSION"
   value         = var.terraform_version
+
+  depends_on = [null_resource.delay_after_environment_creation]
+
 }
 
 resource "github_actions_environment_variable" "environment_name" {
@@ -39,6 +52,8 @@ resource "github_actions_environment_variable" "environment_name" {
   variable_name = "ENVIRONMENT_NAME"
   value         = each.key
 
+  depends_on = [null_resource.delay_after_environment_creation]
+
 }
 
 resource "github_actions_environment_variable" "terraform_working_directory" {
@@ -49,6 +64,8 @@ resource "github_actions_environment_variable" "terraform_working_directory" {
   environment   = each.key
   variable_name = "TERRAFORM_WORKING_DIRECTORY"
   value         = module.terraform_simple_codebase.path
+
+  depends_on = [null_resource.delay_after_environment_creation]
 
 }
 
@@ -66,6 +83,7 @@ module "azure-credential" {
 
   client_id_label = "TERRAFORM_ARM_CLIENT_ID"
 
+  depends_on = [null_resource.delay_after_environment_creation]
 }
 
 module "azure_backend" {
@@ -82,5 +100,7 @@ module "azure_backend" {
   storage_account_name = each.value.backend.storage_account_name
   state_container_name = each.value.backend.state_container_name
   plan_container_name  = each.value.backend.plan_container_name
+
+  depends_on = [null_resource.delay_after_environment_creation]
 
 }
