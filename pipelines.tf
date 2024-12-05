@@ -15,6 +15,9 @@ module "terraform_manual" {
   commit_user  = var.commit_user
   environments = local.branch_name_map
 
+  # we don't want the actions firing when we start pushing commits
+  depends_on = [module.terraform_simple_codebase]
+
 }
 
 module "action-azure-login-test" {
