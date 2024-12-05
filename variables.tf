@@ -88,3 +88,8 @@ and the Azure provider configurations.
 DESCRIPTION
 
 }
+
+variable "delay_after_environment_creation" {
+  type    = number
+  default = 10
+}
